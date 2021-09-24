@@ -1,0 +1,122 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Allow users to limited ec2 instance types",
+    "Parameters":{
+        "RoleName": {
+            "Type":"String",
+            "Description":"Role that will limit instances",
+            "Default":"LimitEC2Instances"
+            }
+    },
+
+    "Resources": {
+        "EC2LimitRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect":"Allow",
+                            "Principal":{
+                                "AWS": [ "arn:aws:iam::092521477875:root",
+                                         "arn:aws:iam::092521477875:user/ri_user"
+                                ]
+                            },
+                            "Action":"sts:AssumeRole"
+                        }
+                    ]
+                },
+                "RoleName": {"Ref" : "RoleName"}
+            }
+        },
+
+        "EC2LimitPolicy": {
+            "Type" : "AWS::IAM::ManagedPolicy",
+            "Properties" : {
+            "ManagedPolicyName": {
+                "Fn::Join": [
+                    "",
+                     [
+                         {
+                              "Ref":"RoleName"
+                              },
+                               "-LimitEC2"
+                                ]
+                            ]
+            },
+            "Roles": [ { "Ref" : "RoleName"}],
+
+            "PolicyDocument": {
+                "Version":"2012-10-17",
+                "Statement": [
+                    {
+                        "Sid": "DescribeAllEC2",
+                        "Effect": "Allow",
+                        "Action": [
+                            "ec2:Describe*"
+                        ],
+                        "Resource": "*"
+                    },
+                    {
+                        "Sid": "LimitInstanceTypes",
+                        "Effect": "Allow",
+                        "Action": [
+                            "ec2:RunInstances"
+                        ],
+                        "Resource": [
+                            "arn:aws:ec2:us-east-1:092521477875:instance/*"
+                        ],
+                        "Condition": {
+                            "StringEquals": {
+                                "ec2:InstanceType": [
+                                    "t2.nano",
+                                    "t2.micro",
+                                    "t2.small"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "Sid": "SetupLaunchPermissions",
+                        "Effect": "Allow",
+                        "Action": [
+                            "ec2:RunInstances"
+                        ],
+                        "Resource": [
+                            "arn:aws:ec2:us-east-1:092521477875:key-pair/*",
+                            "arn:aws:ec2:us-east-1::image/ami-*",
+                            "arn:aws:ec2:us-east-1:092521477875:security-group/*",
+                            "arn:aws:ec2:us-east-1:092521477875:volume/*",
+                            "arn:aws:ec2:us-east-1:092521477875:network-interface/*",
+                            "arn:aws:ec2:us-east-1:092521477875:subnet/*"
+                            
+                        ]
+                    },
+                    {
+                        "Sid": "AllowStopStartAndDeleteOperations",
+                        "Effect": "Allow",
+                        "Action": [
+                            "ec2:StartInstances",
+                            "ec2:StopInstances",
+                            "ec2:TerminateInstances"
+                            
+                        ],
+                        "Resource": "arn:aws:ec2:us-east-1:092521477875:instance/*"
+                    }
+                
+
+
+
+                ]
+            }
+
+
+
+        } 
+
+
+
+    }
+}
+}

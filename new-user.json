@@ -1,0 +1,52 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creating Simple User",
+  "Metadata": {
+    "Version": "fromchangelog",
+    "RepoLocation": "NA",
+    "Pipeline": "NA"
+	
+  },
+  
+  "Parameters" : {
+     "UserName" :{ 
+	 "Type": "String",
+	 "Default": "user_x"
+	 },
+     "TopicAllowed" :{
+         "Type":"String",
+         "Default":"arn:aws:sns:eu-west-1:092521477875:Topic1"
+     }
+  },
+
+  "Resources": {
+  "SimpleUser" : {
+  "Type" : "AWS::IAM::User",
+  "Properties" : {
+      "LoginProfile" : 
+      {
+        "Password" : "*********"
+            },
+            "Policies" : [ {
+                "PolicyName" : "LimitedAccessToSNS",
+                "PolicyDocument" : {
+                   "Version": "2012-10-17",
+                   "Statement" : [ {
+                      "Effect" : "Allow",
+                      "Action" : [ "sns:*" ],
+                      "Resource" : [ { "Ref" : "TopicAllowed" } ]
+                   }, {
+                      "Effect" : "Deny",
+                      "Action" : [ "sns:*" ],
+                      "NotResource" : [ { "Ref" : "TopicAllowed" } ]
+                   } ]
+                }
+             } ],
+      "Path" : "/",
+      "UserName" : {"Ref" : "UserName"}
+        }
+
+        
+}
+}
+}

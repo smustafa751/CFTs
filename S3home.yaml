@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Default stack created"
+Resources:
+  IamPolicyLrnfp:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 's3:ListAllMyBuckets'
+              - 's3:GetBucketLocation'
+            Resource: 'arn:aws:s3:::*'
+            Effect: Allow
+          - Action: 's3:ListBucket'
+            Resource:
+              - 'arn:aws:s3:::arn:aws:s3:::'
+            Effect: Allow
+            Condition:
+              StringLike:
+                's3:prefix':
+                  - ''
+                  - home/
+                  - 'home/${aws:username}/*'
+          - Action: 's3:*'
+            Resource:
+              - 'arn:aws:s3:::arn:aws:s3:::/home/${aws:username}'
+              - 'arn:aws:s3:::arn:aws:s3:::/home/${aws:username}/*'
+            Effect: Allow
+      Description: >-
+        An IAM policy that allows IAM users to access their own home directory
+        in S3. The home directory is a bucket that includes a home folder and
+        folders for individual users (Programmatically and in the Console).
+Parameters: {}
+Metadata: {}
+Conditions: {}
